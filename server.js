@@ -19,7 +19,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '15mb' }));
-app.use(express.static(path.resolve(__dirname, '../frontend')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // ============================================================================
 // التحقق من متغيرات البيئة (لا توجد مفاتيح في الواجهة الأمامية مطلقاً)
