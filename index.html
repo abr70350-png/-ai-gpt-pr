@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI GPT PRO | منصة الذكاء الاصطناعي واستوديو الأنمي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Moyasar Official Payment Form SDK -->
+  <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.14.0/moyasar.css" />
+  <script src="https://cdn.moyasar.com/mpf/1.14.0/moyasar.js"></script>
+  <style>
+    :root {
+      --bg-primary: #090d16;
+      --bg-secondary: #111827;
+      --bg-card: #161f33;
+      --border-color: rgba(212, 175, 55, 0.22);
+      --gold: #d4af37;
+      --gold-light: #f3d06b;
+      --accent: #6366f1;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    body { background: var(--bg-primary); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px; background: var(--bg-secondary); border-left: 1px solid var(--border-color);
+      display: flex; flex-direction: column; padding: 20px; position: fixed; top: 0; bottom: 0; right: 0; z-index: 40;
+      transition: transform 0.3s ease;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+    .brand-logo {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--gold), #9a7b1c);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; color: #090d16; font-size: 18px;
+    }
+    .brand-title { font-size: 20px; font-weight: 800; color: var(--gold-light); letter-spacing: 0.5px; }
+    .nav-list { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-item {
+      padding: 12px 16px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+      color: var(--text-muted); font-weight: 600; transition: 0.2s; border: 1px solid transparent;
+    }
+    .nav-item:hover { background: rgba(212, 175, 55, 0.08); color: var(--text-main); }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.18), rgba(99, 102, 241, 0.12));
+      color: var(--gold-light); border-color: var(--border-color);
+    }
+    .hidden { display: none !important; }
+
+    /* Main Content */
+    .main { margin-right: 280px; flex: 1; padding: 24px 32px; max-width: calc(100vw - 280px); }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      background: var(--bg-secondary); padding: 14px 20px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 24px;
+    }
+    .status-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill {
+      font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 700;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .pill.ok { color: var(--success); border-color: rgba(16,185,129,0.4); }
+    .pill.off { color: var(--warning); border-color: rgba(245,158,11,0.4); }
+
+    /* Cards & Forms */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 22px; margin-bottom: 20px;
+    }
+    .card-title { font-size: 18px; font-weight: 800; color: var(--gold-light); margin-bottom: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+    label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+    input, select, textarea {
+      width: 100%; background: #0c1220; border: 1px solid rgba(255,255,255,0.14); color: var(--text-main);
+      padding: 11px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 14px; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    .btn {
+      background: linear-gradient(135deg, var(--gold), #b48e24); color: #090d16; font-weight: 800;
+      border: none; padding: 11px 20px; border-radius: 10px; cursor: pointer; font-size: 14px; transition: 0.2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid rgba(255,255,255,0.15); }
+    .alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 14px; font-size: 14px; font-weight: 600; }
+    .alert-error { background: rgba(239, 68, 68, 0.14); border: 1px solid var(--danger); color: #fca5a5; }
+    .alert-warn { background: rgba(245, 158, 11, 0.14); border: 1px solid var(--warning); color: #fcd34d; }
+    .alert-ok { background: rgba(16, 185, 129, 0.14); border: 1px solid var(--success); color: #6ee7b7; }
+
+    /* Chat Window */
+    .chat-box { height: 420px; overflow-y: auto; background: #0c1220; border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 14px; }
+    .msg { padding: 12px 16px; border-radius: 12px; margin-bottom: 12px; max-width: 85%; line-height: 1.7; white-space: pre-wrap; }
+    .msg.user { background: rgba(212, 175, 55, 0.16); border: 1px solid var(--border-color); margin-right: auto; }
+    .msg.assistant { background: #182238; border: 1px solid rgba(255,255,255,0.08); margin-left: auto; }
+
+    /* Media Preview */
+    .media-frame {
+      width: 100%; min-height: 320px; background: #0c1220; border: 1px dashed var(--border-color); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; padding: 16px;
+    }
+    .media-frame img, .media-frame video { max-width: 100%; max-height: 440px; border-radius: 12px; }
+
+    /* Progress Bar */
+    .progress-wrap { width: 100%; background: #0c1220; border-radius: 999px; height: 14px; overflow: hidden; margin: 12px 0; border: 1px solid rgba(255,255,255,0.1); }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold), var(--accent)); transition: width 0.4s ease; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 12px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    th { color: var(--gold-light); font-weight: 700; }
+
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-right: 0; max-width: 100vw; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- القائمة الجانبية (لا تحتوي على أي زر تبديل وضع المالك) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">AI</div>
+      <div>
+        <div class="brand-title">AI GPT PRO</div>
+        <div style="font-size: 11px; color: var(--text-muted);">الإصدار الإنتاجي الحقيقي</div>
+      </div>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" data-tab="chat">💬 مساعد الذكاء الاصطناعي</li>
+      <li class="nav-item" data-tab="anime-image">🎨 توليد صور الأنمي</li>
+      <li class="nav-item" data-tab="anime-video">🎬 توليد فيديو الأنمي</li>
+      <li class="nav-item" data-tab="anime-studio">⛩️ استوديو صناعة الأنمي</li>
+      <li class="nav-item" data-tab="pricing">💎 الأسعار والاشتراكات</li>
+      <li class="nav-item" data-tab="auth">🔐 الحساب والمصادقة</li>
+      <!-- يظهر حصرياً إذا أكد الخادم أن المستخدم هو OWNER_EMAIL -->
+      <li class="nav-item hidden" id="owner-nav-item" data-tab="owner">👑 لوحة تحكم المالك</li>
+    </ul>
+    <div style="padding-top: 14px; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted);">
+      <div id="user-badge">الحالة: زائر (غير مسجل)</div>
+    </div>
+  </aside>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="btn btn-secondary" id="menu-toggle" style="padding:8px 12px;">☰</button>
+        <strong style="color:var(--gold-light);">لوحة العمل الذكية</strong>
+      </div>
+      <div class="status-pills" id="service-status-pills">
+        <span class="pill">جاري فحص اتصال الخدمات بالخادم...</span>
+      </div>
+    </header>
+
+    <div id="global-alert" class="alert hidden"></div>
+
+    <!-- 1. قسم المحادثة الذكية الحقيقية -->
+    <section id="tab-chat" class="tab-section">
+      <div class="card">
+        <div class="card-title">مساعد الذكاء الاصطناعي (متصل بنموذج لغوي حقيقي)</div>
+        <div class="grid-2">
+          <div>
+            <label>وضع المساعد</label>
+            <select id="chat-mode">
+              <option value="general">محادثة ذكية شاملة</option>
+              <option value="story">كتابة القصص والروايات</option>
+              <option value="code">البرمجة وكتابة الأكواد</option>
+              <option value="translate">الترجمة والتلخيص</option>
+              <option value="vision">تحليل الصور</option>
+            </select>
+          </div>
+          <div>
+            <label>سجل المحادثات المحفوظة في قاعدة البيانات</label>
+            <select id="saved-conversations">
+              <option value="">+ محادثة جديدة</option>
+            </select>
+          </div>
+        </div>
+        <div class="chat-box" id="chat-messages"></div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="text" id="chat-input" placeholder="اكتب سؤالك الحقيقي هنا..." style="margin-bottom:0; flex:1;" />
+          <button class="btn" id="send-chat-btn">إرسال</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. قسم توليد صور الأنمي الحقيقي -->
+    <section id="tab-anime-image" class="tab-section hidden">
+      <div class="card">
+        <div class="card-title">محرك توليد صور الأنمي (DALL-E 3 / Flux)</div>
+        <div class="grid-3">
+          <div>
+            <label>أسلوب الرسم</label>
+            <select id="img-style">
+              <option value="Modern High-Budget Anime (Ufotable style)">أنمي حديث عالي الجودة</option>
+              <option value="90s Classic Retro Anime">أنمي كلاسيكي التسعينات</option>
+              <option value="Dark Fantasy Manga Illustration">خيال مظلم (Dark Fantasy)</option>
+              <option value="Studio Ghibli Watercolor Anime">أسلوب استوديو جيبلي</option>
+            </select>
+          </div>
+          <div>
+            <label>الخلفية</label>
+            <select id="img-bg">
+              <option value="Tokyo Neon Night Rain">طوكيو ليلاً تحت المطر</option>
+              <option value="Cherry Blossom Academy Courtyard">ساحة أكاديمية مع أزهار الكرز</option>
+              <option value="Ancient Floating Castle Sunset">قلعة عائمة عند الغروب</option>
+              <option value="Cyberpunk Rooftop">سطح مدينة مستقبلية</option>
+            </select>
+          </div>
+          <div>
+            <label>الملابس</label>
+            <select id="img-outfit">
+              <option value="Stylish Dark Academy Uniform">زي أكاديمية أنيق</option>
+              <option value="Futuristic Techwear Jacket">ملابس عصرية مستقبلية</option>
+              <option value="Traditional Samurai Haori">زي ساموراي تقليدي</option>
+              <option value="Royal Fantasy Cloak">رداء ملكي خيالي</option>
+            </select>
+          </div>
+          <div>
+            <label>العمر</label>
+            <select id="img-age">
+              <option value="16 year old teenager">مراهق (16 سنة)</option>
+              <option value="21 year old young adult">شاب (21 سنة)</option>
+              <option value="12 year old child">طفل (12 سنة)</option>
+            </select>
+          </div>
+          <div>
+            <label>الشخصية والتعابير</label>
+            <select id="img-personality">
+              <option value="Confident calm smile">واثق وهادئ</option>
+              <option value="Fierce determined battle gaze">جاد ومستعد للقتال</option>
+              <option value="Mysterious cold expression">غامض وبارد</option>
+            </select>
+          </div>
+        </div>
+        <label>وصف الشخصية (مثال: صمم لي ولد أنمي بشعر أسود وعيون زرقاء)</label>
+        <input type="text" id="img-prompt" placeholder="صمم لي ولد أنمي..." />
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+          <button class="btn" id="generate-img-btn">توليد الصورة الحقيقية</button>
+          <a id="download-img-btn" class="btn btn-secondary hidden" download="ai-gpt-pro-anime.png">⬇️ تنزيل الصورة</a>
+        </div>
+        <div class="media-frame" id="img-preview-frame">
+          <span style="color:var(--text-muted);">ستظهر الصورة المولدة فعلياً هنا بعد اكتمال المعالجة من الخادم.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. قسم توليد فيديو الأنمي الحقيقي -->
+    <section id="tab-anime-video" class="tab-section hidden">
+      <div class="card">
+        <div class="card-title">تحويل صور الأنمي إلى مشاهد فيديو متحركة</div>
+        <label>رابط الصورة أو اختر الصورة المولدة أعلاه تلقائياً</label>
+        <input type="text" id="video-source-img" placeholder="سيتم تعبئته تلقائياً بعد توليد صورة، أو الصق رابط صورة" />
+        <label>وصف الحركة المطلوبة</label>
+        <input type="text" id="video-motion" value="Smooth cinematic anime camera movement, hair blowing in wind" />
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" id="generate-video-btn">بدء توليد الفيديو المتحرك</button>
+          <a id="download-video-btn" class="btn btn-secondary hidden" download="ai-gpt-pro-scene.mp4" target="_blank">⬇️ تنزيل الفيديو</a>
+        </div>
+        <div id="video-progress-section" class="hidden" style="margin-top:16px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <span id="video-status-text">حالة المعالجة: قيد الانتظار</span>
+            <span id="video-percent-text">0%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-bar" id="video-progress-bar"></div></div>
+        </div>
+        <div class="media-frame" id="video-preview-frame" style="margin-top:14px;">
+          <span style="color:var(--text-muted);">سيظهر مشغل الفيديو الحقيقي هنا بعد انتهاء الرندر.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. استوديو صناعة الأنمي المتكامل -->
+    <section id="tab-anime-studio" class="tab-section hidden">
+      <div class="card">
+        <div class="card-title">استوديو صناعة الأنمي بالذكاء الاصطناعي (قصة + شخصيات + سيناريو + حفظ)</div>
+        <div class="grid-3">
+          <div>
+            <label>عنوان المشروع المقترح</label>
+            <input type="text" id="studio-title" placeholder="مثال: ظلال طوكيو" />
+          </div>
+          <div>
+            <label>التصنيف</label>
+            <select id="studio-genre">
+              <option value="أكشن وخيال">أكشن وخيال</option>
+              <option value="غموض وتحقيق">غموض وتحقيق</option>
+              <option value="خيال علمي">خيال علمي</option>
+            </select>
+          </div>
+          <div>
+            <label>عدد الحلقات</label>
+            <input type="number" id="studio-episodes" min="1" max="24" value="1" />
+          </div>
+        </div>
+        <label>فكرة الأنمي الكاملة</label>
+        <textarea id="studio-idea" rows="3" placeholder="اكتب فكرة القصة والصراع الرئيسي..."></textarea>
+        <button class="btn" id="generate-studio-btn">إنشاء وحفظ مشروع الأنمي المتكامل</button>
+      </div>
+      <div id="studio-result-area"></div>
+      <div class="card">
+        <div class="card-title">مشاريعي المحفوظة في قاعدة البيانات</div>
+        <div id="saved-projects-list" style="color:var(--text-muted);">سجل الدخول لعرض مشاريعك المحفوظة.</div>
+      </div>
+    </section>
+
+    <!-- 5. الأسعار والاشتراكات وبوابة الدفع الحقيقية (Moyasar) -->
+    <section id="tab-pricing" class="tab-section hidden">
+      <div class="card">
+        <div class="card-title">حاسبة تكلفة صناعة الأنمي (تبدأ من 399 ريال سعودي)</div>
+        <div class="grid-3">
+          <div>
+            <label>عدد الحلقات</label>
+            <input type="number" id="calc-episodes" min="1" max="50" value="1" />
+          </div>
+          <div>
+            <label>الجودة</label>
+            <select id="calc-quality">
+              <option value="1080p">Full HD 1080p (مشمول)</option>
+              <option value="4K">Ultra HD 4K (+ رسوم إضافية)</option>
+            </select>
+          </div>
+          <div style="display:flex; flex-direction:column; justify-content:center;">
+            <div style="font-size:13px; color:var(--text-muted);">التكلفة الإجمالية قبل الدفع:</div>
+            <div style="font-size:26px; font-weight:800; color:var(--gold-light);" id="calc-total-display">399.00 ر.س</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">الاشتراك الأسبوعي</div>
+          <div style="font-size:28px; font-weight:800; margin:10px 0;" id="price-weekly-label">9.99 ر.س</div>
+          <button class="btn" onclick="openMoyasarCheckout('SUBSCRIPTION', 'WEEKLY')">اشترك الآن عبر Moyasar</button>
+        </div>
+        <div class="card">
+          <div class="card-title">الاشتراك الشهري</div>
+          <div style="font-size:28px; font-weight:800; margin:10px 0;" id="price-monthly-label">29.99 ر.س</div>
+          <button class="btn" onclick="openMoyasarCheckout('SUBSCRIPTION', 'MONTHLY')">اشترك الآن عبر Moyasar</button>
+        </div>
+        <div class="card">
+          <div class="card-title">الاشتراك السنوي</div>
+          <div style="font-size:28px; font-weight:800; margin:10px 0;" id="price-yearly-label">249.99 ر.س</div>
+          <button class="btn" onclick="openMoyasarCheckout('SUBSCRIPTION', 'YEARLY')">اشترك الآن عبر Moyasar</button>
+        </div>
+      </div>
+
+      <!-- حاوية بوابة Moyasar الرسمية -->
+      <div class="card hidden" id="moyasar-checkout-card">
+        <div class="card-title">إتمام الدفع الآمن بالريال السعودي (Moyasar)</div>
+        <div id="moyasar-summary" style="margin-bottom:14px; font-weight:700;"></div>
+        <div class="mysr-form"></div>
+      </div>
+
+      <!-- حاوية الإعلانات المعتمدة (Google AdSense) -->
+      <div class="card" id="ads-container">
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">مساحة إعلانية معتمدة</div>
+        <div id="ads-slot" style="min-height:90px; display:flex; align-items:center; justify-content:center; background:#0c1220; border-radius:10px; color:var(--text-muted); font-size:13px;">
+          لم يتم ربط ADSENSE_CLIENT_ID في الخادم بعد.
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. نظام الحسابات الحقيقي (Supabase Authentication) -->
+    <section id="tab-auth" class="tab-section hidden">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">تسجيل الدخول</div>
+          <label>البريد الإلكتروني</label>
+          <input type="email" id="login-email" placeholder="name@example.com" />
+          <label>كلمة المرور</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn" id="login-btn">دخول</button>
+            <button class="btn btn-secondary" id="reset-pass-btn">استعادة كلمة المرور</button>
+            <button class="btn btn-secondary hidden" id="logout-btn">تسجيل الخروج</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">إنشاء حساب جديد (مع التحقق من البريد)</div>
+          <label>الاسم الكامل</label>
+          <input type="text" id="signup-name" placeholder="الاسم" />
+          <label>البريد الإلكتروني</label>
+          <input type="email" id="signup-email" placeholder="name@example.com" />
+          <label>كلمة المرور (6 أحرف على الأقل)</label>
+          <input type="password" id="signup-password" placeholder="••••••••" />
+          <button class="btn" id="signup-btn">إنشاء الحساب</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. لوحة تحكم المالك (محمية من الخادم عبر OWNER_EMAIL) -->
+    <section id="tab-owner" class="tab-section hidden">
+      <div class="grid-3">
+        <div class="card">
+          <div style="color:var(--text-muted); font-size:13px;">إجمالي الإيرادات الفعلية</div>
+          <div style="font-size:26px; font-weight:800; color:var(--success);" id="own-revenue">0.00 ر.س</div>
+        </div>
+        <div class="card">
+          <div style="color:var(--text-muted); font-size:13px;">إجمالي المصروفات التشغيلية</div>
+          <div style="font-size:26px; font-weight:800; color:var(--danger);" id="own-expenses">0.00 ر.س</div>
+        </div>
+        <div class="card">
+          <div style="color:var(--text-muted); font-size:13px;">صافي الربح الفعلي</div>
+          <div style="font-size:26px; font-weight:800; color:var(--gold-light);" id="own-net">0.00 ر.س</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">إدارة الأسعار (يُحفظ في قاعدة البيانات مباشرة)</div>
+        <div class="grid-3">
+          <div><label>سعر بداية الأنمي (الحد الأدنى 399)</label><input type="number" id="edit-anime-base" min="399" /></div>
+          <div><label>سعر الحلقة الإضافية</label><input type="number" id="edit-anime-ep" /></div>
+          <div><label>رسوم جودة 4K</label><input type="number" id="edit-anime-4k" /></div>
+          <div><label>الاشتراك الأسبوعي</label><input type="number" step="0.01" id="edit-plan-w" /></div>
+          <div><label>الاشتراك الشهري</label><input type="number" step="0.01" id="edit-plan-m" /></div>
+          <div><label>الاشتراك السنوي</label><input type="number" step="0.01" id="edit-plan-y" /></div>
+        </div>
+        <button class="btn" id="save-pricing-btn">حفظ الأسعار الجديدة</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">تسجيل مصروف تشغيلي فعلي</div>
+        <div class="grid-3">
+          <div><label>الفئة</label><input type="text" id="exp-cat" placeholder="مثال: رصيد OpenAI / Replicate" /></div>
+          <div><label>الوصف</label><input type="text" id="exp-desc" placeholder="تفاصيل الفاتورة" /></div>
+          <div><label>المبلغ (ر.س)</label><input type="number" step="0.01" id="exp-amount" /></div>
+        </div>
+        <button class="btn" id="add-expense-btn">تسجيل المصروف</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">سجل المدفوعات الفعلية المؤكدة من Moyasar</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>المعرف</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th></tr></thead>
+            <tbody id="owner-payments-tbody"><tr><td colspan="4">لا توجد مدفوعات مسجلة بعد.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">إدارة المستخدمين المسجلين</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>البريد</th><th>الاسم</th><th>الدور</th><th>الاشتراك</th></tr></thead>
+            <tbody id="owner-users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+  let supabaseClient = null;
+  let accessToken = null;
+  let currentUserProfile = null;
+  let serverStatus = null;
+  let pricingConfig = { anime_base_price: 399, anime_per_episode: 150, anime_quality_4k_fee: 250, plan_weekly: 9.99, plan_monthly: 29.99, plan_yearly: 249.99 };
+
+  function escapeHtml(value) {
+    const node = document.createElement('span');
+    node.textContent = String(value ?? '');
+    return node.innerHTML;
+  }
+
+  function showAlert(msg, type = 'error') {
+    const el = document.getElementById('global-alert');
+    el.textContent = msg;
+    el.className = `alert alert-${type}`;
+    el.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function clearAlert() {
+    document.getElementById('global-alert').classList.add('hidden');
+  }
+
+  async function apiFetch(url, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+    const res = await fetch(url, { ...options, headers });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'حدث خطأ غير متوقع في الخادم.');
+    return data;
+  }
+
+  // التهيئة الأولية وفحص حالة الخدمات الحقيقية
+  async function initApp() {
+    try {
+      const statusRes = await fetch('/api/status');
+      serverStatus = await statusRes.json();
+      renderServicePills(serverStatus.services);
+
+      if (serverStatus.services.supabase && window.supabase) {
+        supabaseClient = window.supabase.createClient(
+          serverStatus.publicConfig.supabaseUrl,
+          serverStatus.publicConfig.supabaseAnonKey
+        );
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+          accessToken = session.access_token;
+          await loadCurrentUser();
+        }
+        supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+          accessToken = session?.access_token || null;
+          if (accessToken) await loadCurrentUser();
+          else resetUserUI();
+        });
+      }
+
+      if (serverStatus.services.ads && serverStatus.publicConfig.adsenseClientId) {
+        const adsSlot = document.getElementById('ads-slot');
+        adsSlot.innerHTML = `<ins class="adsbygoogle" style="display:block;width:100%;" data-ad-client="${serverStatus.publicConfig.adsenseClientId}" data-ad-format="auto" data-full-width-responsive="true"></ins>`;
+      }
+
+      await loadPricing();
+      await checkMoyasarRedirectCallback();
+    } catch (e) {
+      showAlert('تعذر الاتصال بالخادم الخلفي. تأكد من تشغيل الخادم عبر npm start.', 'error');
+    }
+  }
+
+  function renderServicePills(s) {
+    const map = [
+      { key: 'supabase', label: 'قاعدة البيانات والمصادقة' },
+      { key: 'ai_chat', label: 'الذكاء الاصطناعي' },
+      { key: 'image_gen', label: 'توليد الصور' },
+      { key: 'video_gen', label: 'توليد الفيديو' },
+      { key: 'moyasar', label: 'بوابة Moyasar' }
+    ];
+    document.getElementById('service-status-pills').innerHTML = map.map(item =>
+      `<span class="pill ${s[item.key] ? 'ok' : 'off'}">${item.label}: ${s[item.key] ? 'متصل' : 'غير مربوط'}</span>`
+    ).join('');
+  }
+
+  async function loadCurrentUser() {
+    try {
+      const { user } = await apiFetch('/api/me');
+      currentUserProfile = user;
+      document.getElementById('user-badge').textContent = `${user.email} (${user.role} | ${user.subscription_plan})`;
+      document.getElementById('logout-btn').classList.remove('hidden');
+
+      // إظهار لوحة المالك حصرياً إذا أكد الخادم صلاحية OWNER
+      if (user.isOwner && user.role === 'OWNER') {
+        document.getElementById('owner-nav-item').classList.remove('hidden');
+        loadOwnerDashboard();
+      } else {
+        document.getElementById('owner-nav-item').classList.add('hidden');
+      }
+
+      loadConversations();
+      loadAnimeProjects();
+    } catch (e) {
+      resetUserUI();
+    }
+  }
+
+  function resetUserUI() {
+    currentUserProfile = null;
+    document.getElementById('user-badge').textContent = 'الحالة: زائر (غير مسجل)';
+    document.getElementById('owner-nav-item').classList.add('hidden');
+    document.getElementById('logout-btn').classList.add('hidden');
+  }
+
+  // التنقل بين الأقسام
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      clearAlert();
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(`tab-${item.dataset.tab}`).classList.remove('hidden');
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  });
+  document.getElementById('menu-toggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // 1. المحادثة الذكية الحقيقية
+  async function loadConversations() {
+    try {
+      const { conversations } = await apiFetch('/api/conversations');
+      const sel = document.getElementById('saved-conversations');
+      sel.innerHTML = '<option value="">+ محادثة جديدة</option>' +
+        conversations.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.title)}</option>`).join('');
+      sel.dataset.list = JSON.stringify(conversations);
+    } catch (_) {}
+  }
+
+  document.getElementById('saved-conversations').addEventListener('change', (e) => {
+    const list = JSON.parse(e.target.dataset.list || '[]');
+    const found = list.find(c => c.id === e.target.value);
+    const box = document.getElementById('chat-messages');
+    box.innerHTML = '';
+    if (found) {
+      found.messages.forEach(m => appendMessage(m.role, m.content));
+    }
+  });
+
+  function appendMessage(role, text) {
+    const box = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  document.getElementById('send-chat-btn').addEventListener('click', async () => {
+    clearAlert();
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    if (!message) return;
+    const btn = document.getElementById('send-chat-btn');
+    btn.disabled = true;
+    appendMessage('user', message);
+    input.value = '';
+    try {
+      const convId = document.getElementById('saved-conversations').value || null;
+      const mode = document.getElementById('chat-mode').value;
+      const data = await apiFetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ conversationId: convId, message, mode })
+      });
+      appendMessage('assistant', data.reply);
+      await loadConversations();
+      document.getElementById('saved-conversations').value = data.conversation.id;
+    } catch (err) {
+      showAlert(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // 2. توليد صور الأنمي الحقيقية
+  document.getElementById('generate-img-btn').addEventListener('click', async () => {
+    clearAlert();
+    const prompt = document.getElementById('img-prompt').value.trim();
+    if (!prompt) return showAlert('يرجى كتابة وصف الصورة أولاً.', 'warn');
+    const btn = document.getElementById('generate-img-btn');
+    const frame = document.getElementById('img-preview-frame');
+    const dlBtn = document.getElementById('download-img-btn');
+    btn.disabled = true;
+    dlBtn.classList.add('hidden');
+    frame.innerHTML = '<span>جاري توليد الصورة عبر محرك الذكاء الاصطناعي الحقيقي...</span>';
+    try {
+      const data = await apiFetch('/api/anime/image', {
+        method: 'POST',
+        body: JSON.stringify({
+          prompt,
+          style: document.getElementById('img-style').value,
+          background: document.getElementById('img-bg').value,
+          outfit: document.getElementById('img-outfit').value,
+          age: document.getElementById('img-age').value,
+          personality: document.getElementById('img-personality').value
+        })
+      });
+      if (!data.imageUrl) throw new Error('لم يتم استلام صورة صالحة من الخادم.');
+      frame.innerHTML = `<img src="${data.imageUrl}" alt="Generated Anime" />`;
+      dlBtn.href = data.imageUrl;
+      dlBtn.classList.remove('hidden');
+      document.getElementById('video-source-img').value = data.imageUrl;
+    } catch (err) {
+      frame.textContent = `فشل توليد الصورة: ${err.message}`;
+      showAlert(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // 3. توليد فيديو الأنمي الحقيقي مع تتبع التقدم
+  document.getElementById('generate-video-btn').addEventListener('click', async () => {
+    clearAlert();
+    const imageUrl = document.getElementById('video-source-img').value.trim();
+    if (!imageUrl) return showAlert('يرجى توفير صورة لتحويلها إلى فيديو.', 'warn');
+    const btn = document.getElementById('generate-video-btn');
+    const progWrap = document.getElementById('video-progress-section');
+    const progBar = document.getElementById('video-progress-bar');
+    const statusText = document.getElementById('video-status-text');
+    const percentText = document.getElementById('video-percent-text');
+    const dlBtn = document.getElementById('download-video-btn');
+    btn.disabled = true;
+    dlBtn.classList.add('hidden');
+    progWrap.classList.remove('hidden');
+    progBar.style.width = '10%';
+    percentText.textContent = '10%';
+    statusText.textContent = 'جاري إرسال المهمة إلى خادم توليد الفيديو...';
+
+    try {
+      const startData = await apiFetch('/api/anime/video', {
+        method: 'POST',
+        body: JSON.stringify({ imageUrl, motionPrompt: document.getElementById('video-motion').value })
+      });
+      const predId = startData.predictionId;
+      let pollAttempts = 0;
+      const poll = setInterval(async () => {
+        pollAttempts += 1;
+        if (pollAttempts > 120) {
+          clearInterval(poll);
+          btn.disabled = false;
+          showAlert('استغرق توليد الفيديو وقتاً أطول من المتوقع. تحقق من رصيد وحالة Replicate.', 'warn');
+          return;
+        }
+        try {
+          const st = await apiFetch(`/api/anime/video/${predId}`);
+          progBar.style.width = `${st.progress}%`;
+          percentText.textContent = `${st.progress}%`;
+          statusText.textContent = `حالة الرندر: ${st.status}`;
+          if (st.status === 'succeeded' && st.videoUrl) {
+            clearInterval(poll);
+            btn.disabled = false;
+            document.getElementById('video-preview-frame').innerHTML = `<video src="${st.videoUrl}" controls autoplay loop></video>`;
+            dlBtn.href = st.videoUrl;
+            dlBtn.classList.remove('hidden');
+          } else if (st.status === 'failed' || st.status === 'canceled') {
+            clearInterval(poll);
+            btn.disabled = false;
+            showAlert(st.error || 'فشلت عملية توليد الفيديو.', 'error');
+          }
+        } catch (pollErr) {
+          clearInterval(poll);
+          btn.disabled = false;
+          showAlert(pollErr.message, 'error');
+        }
+      }, 3000);
+    } catch (err) {
+      btn.disabled = false;
+      progWrap.classList.add('hidden');
+      showAlert(err.message, 'error');
+    }
+  });
+
+  // 4. استوديو صناعة الأنمي المتكامل
+  document.getElementById('generate-studio-btn').addEventListener('click', async () => {
+    clearAlert();
+    const idea = document.getElementById('studio-idea').value.trim();
+    if (!idea) return showAlert('اكتب فكرة الأنمي أولاً.', 'warn');
+    const btn = document.getElementById('generate-studio-btn');
+    btn.disabled = true;
+    btn.textContent = 'جاري بناء القصة والشخصيات والسيناريو...';
+    try {
+      const { project } = await apiFetch('/api/anime/studio/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: document.getElementById('studio-title').value,
+          genre: document.getElementById('studio-genre').value,
+          episodesCount: Number(document.getElementById('studio-episodes').value),
+          idea
+        })
+      });
+      renderStudioProject(project);
+      await loadAnimeProjects();
+    } catch (err) {
+      showAlert(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'إنشاء وحفظ مشروع الأنمي المتكامل';
+    }
+  });
+
+  function renderStudioProject(p) {
+    const charsHtml = (p.characters || []).map((c, idx) => `
+      <div class="card" style="background:#0c1220;">
+        <strong>${escapeHtml(c.name)}</strong> (${escapeHtml(c.role)})<br/>
+        <small style="color:var(--text-muted);">القدرات: ${escapeHtml(c.abilities)}</small><br/>
+        <button class="btn btn-secondary" style="margin-top:8px;" data-prompt="${escapeHtml(encodeURIComponent(c.visual_prompt || ''))}" data-target="char-img-${idx}" onclick="generateAssetImage(this.dataset.prompt, this.dataset.target)">توليد صورة الشخصية</button>
+        <div id="char-img-${idx}" style="margin-top:10px;"></div>
+      </div>
+    `).join('');
+
+    document.getElementById('studio-result-area').innerHTML = `
+      <div class="card">
+        <div class="card-title">${escapeHtml(p.title)} — التكلفة المقدرة: ${escapeHtml(p.estimated_cost_sar)} ر.س</div>
+        ${p.payment_status === 'PAID' ? '<div class="pill ok">تم الدفع</div>' : `<button class="btn" style="margin:10px 0 14px;" data-project-id="${escapeHtml(p.id)}" onclick="openMoyasarCheckout('ANIME_PROJECT', this.dataset.projectId)">دفع تكلفة المشروع عبر Moyasar</button>`}
+        <p style="margin-bottom:14px; line-height:1.7;">${escapeHtml(p.story_outline)}</p>
+        <h4 style="color:var(--gold-light); margin-bottom:10px;">الشخصيات</h4>
+        <div class="grid-2">${charsHtml}</div>
+        <h4 style="color:var(--gold-light); margin:14px 0 8px;">السيناريو والحوار</h4>
+        <pre style="white-space:pre-wrap; background:#0c1220; padding:14px; border-radius:10px;">${escapeHtml(p.script_text)}</pre>
+      </div>
+    `;
+  }
+
+  window.generateAssetImage = async function(encodedPrompt, targetId) {
+    const el = document.getElementById(targetId);
+    el.innerHTML = 'جاري توليد الصورة...';
+    try {
+      const data = await apiFetch('/api/anime/image', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: decodeURIComponent(encodedPrompt) })
+      });
+      el.innerHTML = `<img src="${data.imageUrl}" style="max-width:100%; border-radius:10px;" />`;
+    } catch (err) {
+      el.textContent = err.message;
+    }
+  };
+
+  async function loadAnimeProjects() {
+    try {
+      const { projects } = await apiFetch('/api/anime/projects');
+      const box = document.getElementById('saved-projects-list');
+      if (!projects.length) { box.textContent = 'لا توجد مشاريع محفوظة بعد.'; return; }
+      box.innerHTML = projects.map(p => `
+        <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+          <div><strong>${p.title}</strong> (${p.episodes_count} حلقات — ${p.estimated_cost_sar} ر.س)</div>
+          <button class="btn btn-secondary" data-project="${escapeHtml(encodeURIComponent(JSON.stringify(p)))}" onclick="renderStudioProject(JSON.parse(decodeURIComponent(this.dataset.project)))">فتح المشروع</button>
+        </div>
+      `).join('');
+    } catch (_) {}
+  }
+
+  // 5. الأسعار وحاسبة الأنمي وبوابة الدفع Moyasar
+  async function loadPricing() {
+    try {
+      const { pricing } = await apiFetch('/api/pricing');
+      pricingConfig = pricing;
+      document.getElementById('price-weekly-label').textContent = `${pricing.plan_weekly} ر.س`;
+      document.getElementById('price-monthly-label').textContent = `${pricing.plan_monthly} ر.س`;
+      document.getElementById('price-yearly-label').textContent = `${pricing.plan_yearly} ر.س`;
+      recalcAnimeCost();
+    } catch (_) {}
+  }
+
+  function recalcAnimeCost() {
+    const eps = Math.max(1, Number(document.getElementById('calc-episodes').value || 1));
+    const qual = document.getElementById('calc-quality').value;
+    const total = Number(pricingConfig.anime_base_price)
+      + (eps - 1) * Number(pricingConfig.anime_per_episode)
+      + (qual === '4K' ? Number(pricingConfig.anime_quality_4k_fee) : 0);
+    document.getElementById('calc-total-display').textContent = `${total.toFixed(2)} ر.س`;
+  }
+  document.getElementById('calc-episodes').addEventListener('input', recalcAnimeCost);
+  document.getElementById('calc-quality').addEventListener('change', recalcAnimeCost);
+
+  window.openMoyasarCheckout = async function(paymentType, planOrProjectId) {
+    clearAlert();
+    if (!accessToken) return showAlert('يجب تسجيل الدخول أولاً قبل الدفع.', 'warn');
+    if (!serverStatus?.services?.moyasar) {
+      return showAlert('بوابة الدفع Moyasar غير مربوطة في إعدادات الخادم (MOYASAR_PUBLISHABLE_KEY).', 'error');
+    }
+    const amounts = {
+      WEEKLY: Number(pricingConfig.plan_weekly),
+      MONTHLY: Number(pricingConfig.plan_monthly),
+      YEARLY: Number(pricingConfig.plan_yearly)
+    };
+    let amountSar = amounts[planOrProjectId];
+    if (paymentType === 'ANIME_PROJECT') {
+      try {
+        const { projects } = await apiFetch('/api/anime/projects');
+        const project = projects.find(p => p.id === planOrProjectId);
+        if (!project) return showAlert('لم يتم العثور على مشروع الأنمي المطلوب.', 'error');
+        if (project.payment_status === 'PAID') return showAlert('هذا المشروع مدفوع مسبقاً.', 'warn');
+        amountSar = Number(project.estimated_cost_sar);
+      } catch (err) {
+        return showAlert(err.message, 'error');
+      }
+    }
+    if (!Number.isFinite(amountSar) || amountSar <= 0) return showAlert('تعذر تحديد المبلغ الصحيح للدفع.', 'error');
+    const card = document.getElementById('moyasar-checkout-card');
+    card.classList.remove('hidden');
+    document.getElementById('moyasar-summary').textContent = `المبلغ المطلوب: ${amountSar.toFixed(2)} ريال سعودي`;
+
+    Moyasar.init({
+      element: '.mysr-form',
+      amount: Math.round(amountSar * 100),
+      currency: 'SAR',
+      description: `AI GPT PRO - ${paymentType} (${planOrProjectId})`,
+      publishable_api_key: serverStatus.publicConfig.moyasarPublishableKey,
+      callback_url: `${window.location.origin}/?paymentType=${paymentType}&planOrProjectId=${planOrProjectId}`,
+      methods: ['creditcard', 'applepay', 'stcpay']
+    });
+  };
+
+  async function checkMoyasarRedirectCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const paymentId = params.get('id');
+    const paymentType = params.get('paymentType');
+    const planOrProjectId = params.get('planOrProjectId');
+    if (paymentId && paymentType && planOrProjectId && accessToken) {
+      try {
+        const res = await apiFetch('/api/payments/verify-moyasar', {
+          method: 'POST',
+          body: JSON.stringify({ paymentId, paymentType, planOrProjectId })
+        });
+        showAlert(`تم التحقق من الدفع بنجاح لدى Moyasar بمبلغ ${res.amountSar} ر.س وتفعيل الباقة.`, 'ok');
+        window.history.replaceState({}, document.title, '/');
+        await loadCurrentUser();
+      } catch (err) {
+        showAlert(err.message, 'error');
+      }
+    }
+  }
+
+  // 6. المصادقة الحقيقية عبر Supabase
+  document.getElementById('signup-btn').addEventListener('click', async () => {
+    clearAlert();
+    if (!supabaseClient) return showAlert('خدمة Supabase غير مربوطة في الخادم.', 'error');
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const fullName = document.getElementById('signup-name').value.trim();
+    const { error } = await supabaseClient.auth.signUp({
+      email, password, options: { data: { full_name: fullName } }
+    });
+    if (error) return showAlert(error.message, 'error');
+    showAlert('تم إنشاء الحساب! يرجى فتح بريدك الإلكتروني لتأكيد الحساب قبل تسجيل الدخول.', 'ok');
+  });
+
+  document.getElementById('login-btn').addEventListener('click', async () => {
+    clearAlert();
+    if (!supabaseClient) return showAlert('خدمة Supabase غير مربوطة في الخادم.', 'error');
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) return showAlert(error.message, 'error');
+    showAlert('تم تسجيل الدخول بنجاح.', 'ok');
+  });
+
+  document.getElementById('reset-pass-btn').addEventListener('click', async () => {
+    clearAlert();
+    if (!supabaseClient) return showAlert('خدمة Supabase غير مربوطة في الخادم.', 'error');
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) return showAlert('أدخل بريدك الإلكتروني أولاً لاستعادة كلمة المرور.', 'warn');
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+    if (error) return showAlert(error.message, 'error');
+    showAlert('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.', 'ok');
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    resetUserUI();
+    showAlert('تم تسجيل الخروج.', 'ok');
+  });
+
+  // 7. لوحة تحكم المالك (بيانات مالية حقيقية 100%)
+  async function loadOwnerDashboard() {
+    try {
+      const data = await apiFetch('/api/owner/dashboard');
+      document.getElementById('own-revenue').textContent = `${data.financials.totalRevenue.toFixed(2)} ر.س`;
+      document.getElementById('own-expenses').textContent = `${data.financials.totalExpenses.toFixed(2)} ر.س`;
+      document.getElementById('own-net').textContent = `${data.financials.netProfit.toFixed(2)} ر.س`;
+
+      document.getElementById('edit-anime-base').value = pricingConfig.anime_base_price;
+      document.getElementById('edit-anime-ep').value = pricingConfig.anime_per_episode;
+      document.getElementById('edit-anime-4k').value = pricingConfig.anime_quality_4k_fee;
+      document.getElementById('edit-plan-w').value = pricingConfig.plan_weekly;
+      document.getElementById('edit-plan-m').value = pricingConfig.plan_monthly;
+      document.getElementById('edit-plan-y').value = pricingConfig.plan_yearly;
+
+      document.getElementById('owner-payments-tbody').innerHTML = data.payments.length
+        ? data.payments.map(p => `<tr><td>${p.moyasar_payment_id}</td><td>${p.payment_type}</td><td>${p.amount_sar} ر.س</td><td>${new Date(p.verified_at).toLocaleDateString('ar-SA')}</td></tr>`).join('')
+        : '<tr><td colspan="4">لا توجد مدفوعات فعلية مسجلة حتى الآن.</td></tr>';
+
+      document.getElementById('owner-users-tbody').innerHTML = data.users.map(u =>
+        `<tr><td>${u.email}</td><td>${u.full_name || '-'}</td><td>${u.role}</td><td>${u.subscription_plan}</td></tr>`
+      ).join('');
+    } catch (err) {
+      showAlert(err.message, 'error');
+    }
+  }
+
+  document.getElementById('save-pricing-btn').addEventListener('click', async () => {
+    try {
+      await apiFetch('/api/owner/pricing', {
+        method: 'PUT',
+        body: JSON.stringify({
+          anime_base_price: document.getElementById('edit-anime-base').value,
+          anime_per_episode: document.getElementById('edit-anime-ep').value,
+          anime_quality_4k_fee: document.getElementById('edit-anime-4k').value,
+          plan_weekly: document.getElementById('edit-plan-w').value,
+          plan_monthly: document.getElementById('edit-plan-m').value,
+          plan_yearly: document.getElementById('edit-plan-y').value
+        })
+      });
+      await loadPricing();
+      showAlert('تم تحديث الأسعار في قاعدة البيانات بنجاح.', 'ok');
+    } catch (err) {
+      showAlert(err.message, 'error');
+    }
+  });
+
+  document.getElementById('add-expense-btn').addEventListener('click', async () => {
+    try {
+      await apiFetch('/api/owner/expenses', {
+        method: 'POST',
+        body: JSON.stringify({
+          category: document.getElementById('exp-cat').value,
+          description: document.getElementById('exp-desc').value,
+          amount_sar: document.getElementById('exp-amount').value
+        })
+      });
+      await loadOwnerDashboard();
+      showAlert('تم تسجيل المصروف الفعلي وتحديث صافي الربح.', 'ok');
+    } catch (err) {
+      showAlert(err.message, 'error');
+    }
+  });
+
+  initApp();
+</script>
+</body>
+</html>
